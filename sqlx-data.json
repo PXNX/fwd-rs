@@ -1,0 +1,94 @@
+{
+  "db": "PostgreSQL",
+  "353c48274cce36a8366d20fd0644c8b5427b395af9d4647b1270bca5ff9ed4c3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "target",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "select * from links where id = $1;"
+  },
+  "b79111cd9fd33231646cbf6b5456cdb2561a57d820efb98da7bfa8592e9c3815": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "insert into accesses(link_id, address) values ($1,$2);"
+  },
+  "e46f75b0ef0991f4635387718a3ac85980bcc12d3ad2a6277afdd99a91dd3f1d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "target",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "insert into links(author,target,title) values($1,$2,$3) returning *;"
+  }
+}
