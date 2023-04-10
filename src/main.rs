@@ -6,10 +6,10 @@ use axum::http::StatusCode;
 use axum::response::Redirect;
 use axum::routing::get;
 use axum::{async_trait, Extension};
-use dotenv::dotenv;
 use models::Link;
 use reqwest::Url;
 
+use shuttle_secrets::SecretStore;
 use sqlx::{query, query_as, Executor, PgPool};
 use teloxide::adaptors::DefaultParseMode;
 use teloxide::dispatching::dialogue::InMemStorage;
@@ -31,7 +31,9 @@ pub enum LinkDialogueState {
 }
 
 pub struct CustomService {
+    token: String,
     pool: PgPool,
+    hostname: String,
 }
 
 #[async_trait]
@@ -47,10 +49,15 @@ impl shuttle_service::Service for CustomService {
             .await
             .map_err(shuttle_service::error::CustomError::new)?;
 
-        let bot: DefaultParseMode<Bot> = Bot::from_env().parse_mode(ParseMode::Html);
-        let token = bot.inner().token();
-        let host = env::var("HOST").expect("HOST env variable is not set");
-        let url = Url::parse(&format!("https://{host}/webhooks/{token}")).unwrap();
+        let bot: DefaultParseMode<Bot> = Bot::new(&self.token).parse_mode(ParseMode::Html);
+
+        let url = Url::parse(&format!(
+            "https://{}/webhooks/{}",
+            self.hostname, self.token
+        ))
+        .unwrap();
+
+        log::info!("done setting up bot.");
 
         /*    let pool = PgPoolOptions::new()
         .max_connections(5)
@@ -82,6 +89,8 @@ impl shuttle_service::Service for CustomService {
             ])
             .build();
 
+        log::info!("done setting up dp.");
+
         let router = listener
             .2
             .route("/:link_id/:title", get(redirect_link))
@@ -92,6 +101,8 @@ impl shuttle_service::Service for CustomService {
             .serve(router.into_make_service_with_connect_info::<SocketAddr>());
 
         let bot = dp.dispatch_with_listener(listener.0, Arc::new(IgnoringErrorHandlerSafe));
+
+        log::info!("done setting up server.");
 
         tokio::select!(
         _ = server=>{},
@@ -105,8 +116,8 @@ impl shuttle_service::Service for CustomService {
 #[shuttle_runtime::main]
 async fn init(
     #[shuttle_shared_db::Postgres] pool: PgPool,
+    #[shuttle_secrets::Secrets] secret_store: SecretStore,
 ) -> Result<CustomService, shuttle_service::Error> {
-    dotenv().ok();
     /*    let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
         .build("log/output.log")
@@ -119,9 +130,19 @@ async fn init(
 
     log4rs::init_config(config).unwrap();*/
 
+    let token = secret_store
+        .get("TELOXIDE_TOKEN")
+        .expect("No telegram token provided");
+
+    let hostname = secret_store.get("HOSTNAME").expect("No hostname provided");
+
     log::info!("Starting fwd...");
 
-    Ok(CustomService { pool: pool })
+    Ok(CustomService {
+        token: token,
+        pool: pool,
+        hostname: hostname,
+    })
 }
 
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
