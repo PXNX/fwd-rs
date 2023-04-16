@@ -4,18 +4,31 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-teloxide = { version = "0.12.2", features = ["macros", "auto-send", "webhooks-axum"] }
-axum = { version = "0.6.12", features = ["headers" ] }
-sqlx = { version = "0.6.3", default-features=false, features = ["runtime-tokio-native-tls", "macros", "chrono", "postgres","offline"] }
+teloxide = { version = "0.12.2", features = [
+    "macros",
+    "auto-send",
+    "webhooks-axum",
+] }
+axum = { version = "0.6.12", features = ["headers"] }
+sqlx = { version = "0.6.3", default-features = false, features = [
+    "runtime-tokio-native-tls",
+    "macros",
+    "chrono",
+    "postgres",
+    "offline",
+] }
 dotenv = "0.15.0"
 chrono = { version = "0.4", features = ["serde"] }
 log = "0.4.17"
-log4rs="1.2.0"
+log4rs = "1.2.0"
 tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros"] }
 serde = { version = "1.0.159", features = ["derive"] }
 reqwest = "0.11.16"
+axum-client-ip = "0.4.0"
 shuttle-axum = { version = "0.13.0" }
 shuttle-secrets = "0.13.0"
 shuttle-service = { version = "0.13.0" }
 shuttle-runtime = { version = "0.13.0" }
 shuttle-shared-db = { version = "0.13.0", features = ["postgres"] }
+hyper = { version = "0.14.25", features = ["server"] }
+http = "0.2.9"
